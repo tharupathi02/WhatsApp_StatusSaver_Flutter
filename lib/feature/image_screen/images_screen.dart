@@ -2,14 +2,38 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:statussaver/provider/get_status.dart';
+import 'package:statussaver/service/admob_service.dart';
 import 'package:statussaver/utils/constants/colors.dart';
 
 import 'image_view.dart';
 
-class ImagesScreen extends StatelessWidget {
+class ImagesScreen extends StatefulWidget {
   const ImagesScreen({super.key});
+
+  @override
+  State<ImagesScreen> createState() => _ImagesScreenState();
+}
+
+class _ImagesScreenState extends State<ImagesScreen> {
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    _createBannerAd();
+  }
+
+  void _createBannerAd() {
+    _bannerAd = BannerAd(
+      size: AdSize.fullBanner,
+      adUnitId: AdMobService.bannerAdUnitId!,
+      listener: AdMobService.bannerAdListener,
+      request: const AdRequest(),
+    )..load();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +94,13 @@ class ImagesScreen extends StatelessWidget {
           );
         },
       ),
+      bottomNavigationBar: _bannerAd == null
+          ? Container()
+          : Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              height: _bannerAd!.size.height.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
     );
   }
 }

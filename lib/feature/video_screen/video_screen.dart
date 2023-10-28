@@ -2,16 +2,40 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:statussaver/feature/video_screen/video_view.dart';
 
 import '../../provider/get_status.dart';
+import '../../service/admob_service.dart';
 import '../../utils/constants/colors.dart';
 import 'get_thumbnail.dart';
 
-class VideosScreen extends StatelessWidget {
+class VideosScreen extends StatefulWidget {
   const VideosScreen({super.key});
+
+  @override
+  State<VideosScreen> createState() => _VideosScreenState();
+}
+
+class _VideosScreenState extends State<VideosScreen> {
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    _createBannerAd();
+  }
+
+  void _createBannerAd() {
+    _bannerAd = BannerAd(
+      size: AdSize.fullBanner,
+      adUnitId: AdMobService.bannerAdUnitId!,
+      listener: AdMobService.bannerAdListener,
+      request: const AdRequest(),
+    )..load();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +74,8 @@ class VideosScreen extends StatelessWidget {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => VideoView(
-                                            videoPath: file.getVideos[index].path,
+                                            videoPath:
+                                                file.getVideos[index].path,
                                           ),
                                         ),
                                       );
@@ -59,7 +84,8 @@ class VideosScreen extends StatelessWidget {
                                       children: [
                                         Container(
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
                                             color: SColors.primary,
                                           ),
                                           child: Image.file(
@@ -73,7 +99,8 @@ class VideosScreen extends StatelessWidget {
                                           child: Container(
                                             padding: const EdgeInsets.all(5),
                                             decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(50),
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
                                               color: SColors.primary,
                                             ),
                                             child: const Icon(
@@ -94,6 +121,13 @@ class VideosScreen extends StatelessWidget {
           );
         },
       ),
+      bottomNavigationBar: _bannerAd == null
+          ? Container()
+          : Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              height: _bannerAd!.size.height.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
     );
   }
 }

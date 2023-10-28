@@ -2,12 +2,14 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../common/widgets/appbar.dart';
+import '../../service/admob_service.dart';
 import '../../utils/constants/text_strings.dart';
 
 class VideoView extends StatefulWidget {
@@ -21,6 +23,24 @@ class VideoView extends StatefulWidget {
 
 class _VideoViewState extends State<VideoView> {
   ChewieController? _chewieController;
+  InterstitialAd? _interstitialAd;
+
+  void _createInterstitialAd() {
+    InterstitialAd.load(
+        adUnitId: AdMobService.interstitialAdUnitId!,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            _interstitialAd = ad;
+            print('InterstitialAd loaded');
+          },
+          onAdFailedToLoad: (LoadAdError error) {
+            _interstitialAd = null;
+            print('InterstitialAd failed to load: $error');
+          },
+        )
+    );
+  }
 
   @override
   void initState() {
@@ -33,7 +53,7 @@ class _VideoViewState extends State<VideoView> {
       zoomAndPan: true,
       looping: true,
       allowMuting: true,
-      aspectRatio: 9 / 16,
+      aspectRatio: 9 / 19,
       errorBuilder: (context, errorMessage) {
         return Center(
           child: Text(
@@ -43,6 +63,21 @@ class _VideoViewState extends State<VideoView> {
         );
       },
     );
+    _createInterstitialAd();
+    if (_interstitialAd != null) {
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+          _createInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (ad, error) {
+          ad.dispose();
+          _createInterstitialAd();
+        },
+      );
+      _interstitialAd!.show();
+      _interstitialAd = null;
+    }
   }
 
   @override

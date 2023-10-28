@@ -1,18 +1,64 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:statussaver/service/admob_service.dart';
 import 'package:zoom_pinch_overlay/zoom_pinch_overlay.dart';
 
 import '../../common/widgets/appbar.dart';
 import '../../utils/constants/text_strings.dart';
 
-class ImageView extends StatelessWidget {
+class ImageView extends StatefulWidget {
   final String? imagePath;
 
   const ImageView({super.key, this.imagePath});
+
+  @override
+  State<ImageView> createState() => _ImageViewState();
+}
+
+class _ImageViewState extends State<ImageView> {
+  InterstitialAd? _interstitialAd;
+
+  @override
+  void initState() {
+    super.initState();
+    _createInterstitialAd();
+    if (_interstitialAd != null) {
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+          _createInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (ad, error) {
+          ad.dispose();
+          _createInterstitialAd();
+        },
+      );
+      _interstitialAd!.show();
+      _interstitialAd = null;
+    }
+  }
+
+  void _createInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdMobService.interstitialAdUnitId!,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          _interstitialAd = ad;
+          print('InterstitialAd loaded');
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          _interstitialAd = null;
+          print('InterstitialAd failed to load: $error');
+        },
+      )
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +81,7 @@ class ImageView extends StatelessWidget {
           actions: [
             IconButton(
               onPressed: () {
-                ImageGallerySaver.saveFile(imagePath!).then((value) {
+                ImageGallerySaver.saveFile(widget.imagePath!).then((value) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Image Saved Successfully'),
@@ -50,7 +96,7 @@ class ImageView extends StatelessWidget {
             ),
             IconButton(
               onPressed: () {
-                Share.shareFiles([imagePath!]);
+                Share.shareFiles([widget.imagePath!]);
               },
               icon: const Icon(
                 Iconsax.share,
@@ -63,7 +109,7 @@ class ImageView extends StatelessWidget {
           child: ZoomOverlay(
             twoTouchOnly: true,
             child: Image.file(
-              File(imagePath!),
+              File(widget.imagePath!),
               fit: BoxFit.cover,
             ),
           ),
