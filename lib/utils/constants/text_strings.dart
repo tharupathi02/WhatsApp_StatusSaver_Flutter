@@ -20,6 +20,8 @@ class STexts {
   // -- Home
   static const String homeAppbarTitle = "WhatsApp Status Saver";
   static const String homeAppbarSubTitle = "WhatsApp";
+  static const String homeAppbarTab1 = "Images";
+  static const String homeAppbarTab2 = "Videos";
 
 
 }

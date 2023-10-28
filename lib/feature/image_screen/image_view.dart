@@ -21,11 +21,13 @@ class ImageView extends StatefulWidget {
 }
 
 class _ImageViewState extends State<ImageView> {
+  BannerAd? _bannerAd;
   InterstitialAd? _interstitialAd;
 
   @override
   void initState() {
     super.initState();
+    _createBannerAd();
     _createInterstitialAd();
     if (_interstitialAd != null) {
       _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
@@ -43,76 +45,92 @@ class _ImageViewState extends State<ImageView> {
     }
   }
 
+  void _createBannerAd() {
+    _bannerAd = BannerAd(
+      size: AdSize.fullBanner,
+      adUnitId: AdMobService.bannerAdUnitId!,
+      listener: AdMobService.bannerAdListener,
+      request: const AdRequest(),
+    )..load();
+  }
+
   void _createInterstitialAd() {
     InterstitialAd.load(
-      adUnitId: AdMobService.interstitialAdUnitId!,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          _interstitialAd = ad;
-          print('InterstitialAd loaded');
-        },
-        onAdFailedToLoad: (LoadAdError error) {
-          _interstitialAd = null;
-          print('InterstitialAd failed to load: $error');
-        },
-      )
-    );
+        adUnitId: AdMobService.interstitialAdUnitId!,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            _interstitialAd = ad;
+            print('InterstitialAd loaded');
+          },
+          onAdFailedToLoad: (LoadAdError error) {
+            _interstitialAd = null;
+            print('InterstitialAd failed to load: $error');
+          },
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: SAppBar(
-          showBackArrow: true,
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                STexts.homeAppbarTitle,
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              Text(
-                STexts.homeAppbarSubTitle,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                ImageGallerySaver.saveFile(widget.imagePath!).then((value) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Image Saved Successfully'),
-                    ),
-                  );
-                });
-              },
-              icon: const Icon(
-                Iconsax.document_download,
-                size: 20,
-              ),
+      appBar: SAppBar(
+        showBackArrow: true,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              STexts.homeAppbarTitle,
+              style: Theme.of(context).textTheme.labelMedium,
             ),
-            IconButton(
-              onPressed: () {
-                Share.shareFiles([widget.imagePath!]);
-              },
-              icon: const Icon(
-                Iconsax.share,
-                size: 20,
-              ),
+            Text(
+              STexts.homeAppbarSubTitle,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
           ],
         ),
-        body: Center(
-          child: ZoomOverlay(
-            twoTouchOnly: true,
-            child: Image.file(
-              File(widget.imagePath!),
-              fit: BoxFit.cover,
+        actions: [
+          IconButton(
+            onPressed: () {
+              ImageGallerySaver.saveFile(widget.imagePath!).then((value) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Image Saved Successfully'),
+                  ),
+                );
+              });
+            },
+            icon: const Icon(
+              Iconsax.document_download,
+              size: 20,
             ),
           ),
-        ));
+          IconButton(
+            onPressed: () {
+              Share.shareFiles([widget.imagePath!]);
+            },
+            icon: const Icon(
+              Iconsax.share,
+              size: 20,
+            ),
+          ),
+        ],
+      ),
+      body: Center(
+        child: ZoomOverlay(
+          twoTouchOnly: true,
+          child: Image.file(
+            File(widget.imagePath!),
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+      bottomNavigationBar: _bannerAd == null
+          ? Container()
+          : Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              height: _bannerAd!.size.height.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
+    );
   }
 }

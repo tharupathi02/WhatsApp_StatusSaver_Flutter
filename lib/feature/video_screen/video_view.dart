@@ -23,7 +23,17 @@ class VideoView extends StatefulWidget {
 
 class _VideoViewState extends State<VideoView> {
   ChewieController? _chewieController;
+  BannerAd? _bannerAd;
   InterstitialAd? _interstitialAd;
+
+  void _createBannerAd() {
+    _bannerAd = BannerAd(
+      size: AdSize.fullBanner,
+      adUnitId: AdMobService.bannerAdUnitId!,
+      listener: AdMobService.bannerAdListener,
+      request: const AdRequest(),
+    )..load();
+  }
 
   void _createInterstitialAd() {
     InterstitialAd.load(
@@ -63,6 +73,7 @@ class _VideoViewState extends State<VideoView> {
         );
       },
     );
+    _createBannerAd();
     _createInterstitialAd();
     if (_interstitialAd != null) {
       _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
@@ -133,6 +144,13 @@ class _VideoViewState extends State<VideoView> {
         ],
       ),
       body: Chewie(controller: _chewieController!),
+      bottomNavigationBar: _bannerAd == null
+          ? Container()
+          : Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        height: _bannerAd!.size.height.toDouble(),
+        child: AdWidget(ad: _bannerAd!),
+      ),
     );
   }
 }
