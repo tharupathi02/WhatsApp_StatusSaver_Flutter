@@ -8,9 +8,7 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../common/widgets/appbar.dart';
 import '../../service/admob_service.dart';
-import '../../utils/constants/text_strings.dart';
 
 class VideoView extends StatefulWidget {
   final String? videoPath;
@@ -48,8 +46,7 @@ class _VideoViewState extends State<VideoView> {
             _interstitialAd = null;
             print('InterstitialAd failed to load: $error');
           },
-        )
-    );
+        ));
   }
 
   @override
@@ -100,56 +97,46 @@ class _VideoViewState extends State<VideoView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: SAppBar(
-        showBackArrow: true,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              STexts.homeAppbarTitle,
-              style: Theme.of(context).textTheme.labelMedium,
+    return DefaultTabController(
+      length: 0,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: const Icon(Iconsax.arrow_left),
+          actions: [
+            IconButton(
+              onPressed: () {
+                ImageGallerySaver.saveFile(widget.videoPath!).then((value) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Video Saved Successfully'),
+                    ),
+                  );
+                });
+              },
+              icon: const Icon(
+                Iconsax.document_download,
+                size: 20,
+              ),
             ),
-            Text(
-              STexts.homeAppbarSubTitle,
-              style: Theme.of(context).textTheme.headlineSmall,
+            IconButton(
+              onPressed: () {
+                Share.shareFiles([widget.videoPath.toString()]);
+              },
+              icon: const Icon(
+                Iconsax.share,
+                size: 20,
+              ),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              ImageGallerySaver.saveFile(widget.videoPath!).then((value) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Video Saved Successfully'),
-                  ),
-                );
-              });
-            },
-            icon: const Icon(
-              Iconsax.document_download,
-              size: 20,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              Share.shareFiles([widget.videoPath.toString()]);
-            },
-            icon: const Icon(
-              Iconsax.share,
-              size: 20,
-            ),
-          ),
-        ],
-      ),
-      body: Chewie(controller: _chewieController!),
-      bottomNavigationBar: _bannerAd == null
-          ? Container()
-          : Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        height: _bannerAd!.size.height.toDouble(),
-        child: AdWidget(ad: _bannerAd!),
+        body: Chewie(controller: _chewieController!),
+        bottomNavigationBar: _bannerAd == null
+            ? Container()
+            : Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              ),
       ),
     );
   }

@@ -8,9 +8,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:statussaver/service/admob_service.dart';
 import 'package:zoom_pinch_overlay/zoom_pinch_overlay.dart';
 
-import '../../common/widgets/appbar.dart';
-import '../../utils/constants/text_strings.dart';
-
 class ImageView extends StatefulWidget {
   final String? imagePath;
 
@@ -72,65 +69,55 @@ class _ImageViewState extends State<ImageView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: SAppBar(
-        showBackArrow: true,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              STexts.homeAppbarTitle,
-              style: Theme.of(context).textTheme.labelMedium,
+    return DefaultTabController(
+      length: 0,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: const Icon(Iconsax.arrow_left),
+          actions: [
+            IconButton(
+              onPressed: () {
+                ImageGallerySaver.saveFile(widget.imagePath!).then((value) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Image Saved Successfully'),
+                    ),
+                  );
+                });
+              },
+              icon: const Icon(
+                Iconsax.document_download,
+                size: 20,
+              ),
             ),
-            Text(
-              STexts.homeAppbarSubTitle,
-              style: Theme.of(context).textTheme.headlineSmall,
+            IconButton(
+              onPressed: () {
+                Share.shareFiles([widget.imagePath.toString()]);
+              },
+              icon: const Icon(
+                Iconsax.share,
+                size: 20,
+              ),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              ImageGallerySaver.saveFile(widget.imagePath!).then((value) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Image Saved Successfully'),
-                  ),
-                );
-              });
-            },
-            icon: const Icon(
-              Iconsax.document_download,
-              size: 20,
+        body: Center(
+          child: ZoomOverlay(
+            twoTouchOnly: true,
+            child: Image.file(
+              File(widget.imagePath!),
+              fit: BoxFit.cover,
             ),
-          ),
-          IconButton(
-            onPressed: () {
-              Share.shareFiles([widget.imagePath!]);
-            },
-            icon: const Icon(
-              Iconsax.share,
-              size: 20,
-            ),
-          ),
-        ],
-      ),
-      body: Center(
-        child: ZoomOverlay(
-          twoTouchOnly: true,
-          child: Image.file(
-            File(widget.imagePath!),
-            fit: BoxFit.cover,
           ),
         ),
+        bottomNavigationBar: _bannerAd == null
+            ? Container()
+            : Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              ),
       ),
-      bottomNavigationBar: _bannerAd == null
-          ? Container()
-          : Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
-            ),
     );
   }
 }
