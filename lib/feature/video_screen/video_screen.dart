@@ -6,6 +6,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:statussaver/feature/video_screen/video_view.dart';
+import 'package:statussaver/utils/constants/sizes.dart';
 
 import '../../provider/get_status.dart';
 import '../../service/admob_service.dart';
@@ -94,18 +95,18 @@ class _VideosScreenState extends State<VideosScreen> {
                                           ),
                                         ),
                                         Positioned(
-                                          bottom: 10,
-                                          right: 10,
+                                          bottom: 0,
+                                          right: 0,
                                           child: Container(
-                                            padding: const EdgeInsets.all(5),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(50),
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: const BoxDecoration(
+                                              borderRadius: BorderRadius.only(topLeft: Radius.circular(SSizes.borderRadiusLg)),
                                               color: SColors.primary,
                                             ),
                                             child: const Icon(
-                                              Iconsax.play,
-                                              size: 20,
+                                              Iconsax.video,
+                                              color: Colors.white,
+                                              size: 25,
                                             ),
                                           ),
                                         ),
