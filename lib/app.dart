@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:provider/provider.dart';
+import 'package:statussaver/provider/get_images.dart';
 import 'package:statussaver/provider/get_status.dart';
 
 import 'feature/splash_screen/splash_screen.dart';
@@ -16,6 +17,7 @@ class StatusSaver extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => GetStatusProvider()),
+        ChangeNotifierProvider(create: (_) => GetImages()),
       ],
       child: GetMaterialApp(
         title: STexts.appName,
